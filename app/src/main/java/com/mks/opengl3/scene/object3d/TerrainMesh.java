@@ -26,91 +26,94 @@ public class TerrainMesh extends Mesh {
 
         setLineIndices(createLineIndicesOptimized(createVertices(width,height),width,height));
     }
+
+
     private static int[] createLineIndicesOptimized(float[] vertices, int w, int h) {
         ArrayList<Integer> ind = new ArrayList<>();
         int stride = 15;
 
         // ساخت ماتریس Z
-        float[][] zMatrix = new float[h][w];
+        float[][][] zMatrix = new float[h][w][3];
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                zMatrix[y][x] = vertices[(y * w + x) * stride + 2];
+                zMatrix[y][x][0] = vertices[(y * w + x) * stride + 2];
+                zMatrix[y][x][1] = 0.0f;
+                zMatrix[y][x][2] = y * w + x;
+            }
+        }
+        boolean[] near =new boolean[4];
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                if ((x==0)&&(y==0)) zMatrix[y][x][1] = 1.0f;
+                else if ((x==w-1)&&(y==0)) zMatrix[y][x][1] = 1.0f;
+                else if ((x==w-1)&&(y==h-1)) zMatrix[y][x][1] = 1.0f;
+                else if ((x==0)&&(y==h-1)) zMatrix[y][x][1] = 1.0f;
+                else if ((x>0)&&(y==0)&&(x<w-1)
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x-1][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x+1][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y+1][x][0])
+                ) zMatrix[y][x][1] = 1.0f;
+                else if ((x>0)&&(y==h-1)&&(x<w-1)
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x-1][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x+1][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y-1][x][0])
+                ) zMatrix[y][x][1] = 1.0f;
+                else if ((y>0)&&(x==0)&&(y<h-1)
+                        &&(zMatrix[y][x][0]!=zMatrix[y-1][x][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y+1][x][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x+1][0])
+                ) zMatrix[y][x][1] = 1.0f;
+                else if ((y>0)&&(x==w-1)&&(y<h-1)
+                        &&(zMatrix[y][x][0]!=zMatrix[y-1][x][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y+1][x][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x-1][0])
+                ) zMatrix[y][x][1] = 1.0f;
+                else if ((y>0)&&(y<h-1)&&(x>0)&&(x<w-1)
+                        &&(zMatrix[y][x][0]!=zMatrix[y-1][x][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y+1][x][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x-1][0])
+                        &&(zMatrix[y][x][0]!=zMatrix[y][x+1][0])
+                ) zMatrix[y][x][1] = 1.0f;
             }
         }
 
         // Horizontal
-        for (int y = 0; y < h; y++) {
-            int start = 0;
-            float currentZ = zMatrix[y][0];
-            int count = 1;
 
-            for (int x = 1; x < w; x++) {
-                if (zMatrix[y][x] == currentZ) {
-                    count++;
-                } else {
-                    // اگر تعداد ورتیس‌های با Z یکسان >= 3 باشد
-                    if (count >= 3) {
-                        // خط از start تا x-1
-                        ind.add(y * w + start);
-                        ind.add(y * w + (x - 1));
-                    }
+        ArrayList<Integer> ind = new ArrayList<>();
 
-                    // خط مرزی (اگر تعداد در دو طرف >= 3 باشد)
-                    if (count >= 3 || (x < w - 1 && getConsecutiveCount(zMatrix[y], x, zMatrix[y][x]) >= 3)) {
-                        ind.add(y * w + (x - 1));
-                        ind.add(y * w + x);
-                    }
+        // Horizontal
+        for(int y=0;y<h;y++){
 
-                    start = x;
-                    currentZ = zMatrix[y][x];
-                    count = 1;
-                }
-            }
+            for(int x=0;x<w-1;x++){
 
-            // آخرین گروه
-            if (count >= 3 && start < w - 1) {
-                ind.add(y * w + start);
-                ind.add(y * w + (w - 1));
+                int i0=y*w+x;
+                int i1=i0+1;
+
+                ind.add(i0);
+                ind.add(i1);
             }
         }
 
-        // Vertical (همین منطق برای ستون‌ها)
-        for (int x = 0; x < w; x++) {
-            int start = 0;
-            float currentZ = zMatrix[0][x];
-            int count = 1;
+        // Vertical
+        for(int x=0;x<w;x++){
 
-            for (int y = 1; y < h; y++) {
-                if (zMatrix[y][x] == currentZ) {
-                    count++;
-                } else {
-                    if (count >= 3) {
-                        ind.add(start * w + x);
-                        ind.add((y - 1) * w + x);
-                    }
+            for(int y=0;y<h-1;y++){
 
-                    if (count >= 3 || (y < h - 1 && getConsecutiveCountVertical(zMatrix, y, x, zMatrix[y][x]) >= 3)) {
-                        ind.add((y - 1) * w + x);
-                        ind.add(y * w + x);
-                    }
+                int i0=y*w+x;
+                int i1=i0+w;
 
-                    start = y;
-                    currentZ = zMatrix[y][x];
-                    count = 1;
-                }
-            }
-
-            if (count >= 3 && start < h - 1) {
-                ind.add(start * w + x);
-                ind.add((h - 1) * w + x);
+                ind.add(i0);
+                ind.add(i1);
             }
         }
 
-        int[] result = new int[ind.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = ind.get(i);
-        }
-        return result;
+        int[] r=new int[ind.size()];
+
+        for(int i=0;i<r.length;i++)
+            r[i]=ind.get(i);
+
+        return r;
+
     }
 
     // تابع کمکی برای شمارش تعداد متوالی در یک ردیف
