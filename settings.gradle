@@ -1,0 +1,21 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven{url = uri("https://maven.myket.ir")}
+        maven { url 'https://jitpack.io' }
+        // اگر از مخزن خاصی استفاده می‌کنید، اینجا اضافه کنید
+        // maven { url 'https://jitpack.io' }
+    }
+}
+
+rootProject.name = "OpneGlES3"
+include ':app'
