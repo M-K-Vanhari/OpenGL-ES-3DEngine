@@ -1,5 +1,7 @@
 package com.mks.opengl3;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
@@ -7,6 +9,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.opengl.GLES32;
 import android.view.ScaleGestureDetector;
+import android.widget.TextView;
 
 import com.mks.opengl3.events.Event;
 import com.mks.opengl3.events.WindowResizeEvent;
@@ -27,8 +30,12 @@ public class AppRenderer extends ScaleGestureDetector.SimpleOnScaleGestureListen
     Context context;
     List<Layer> layerStack = new ArrayList<Layer>();
     Timer timer;
+    Scene scene;
 
-
+    private TextView txtDebug;
+    private long lastTime = System.currentTimeMillis();
+    private int frameCount = 0;
+    private int fps = 0;
 
     public AppRenderer(Context context){
         this.context = context;
@@ -36,13 +43,17 @@ public class AppRenderer extends ScaleGestureDetector.SimpleOnScaleGestureListen
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig){
-        layerStack.add(new Scene(context));
+        scene = new Scene(context);
+        layerStack.add(scene);
         // Creating UI test
       //  UI ui = new UI(context);
       //  ui.addToLayerStack(layerStack);
         GLES32.glEnable(GLES32.GL_DEPTH_TEST);
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask(){ public void run(){onUpdate();}}, 0, 16);
+    }
+    public void setDebugTextView(TextView txtDebug) {
+        this.txtDebug = txtDebug;
     }
 
     @Override
@@ -54,6 +65,7 @@ public class AppRenderer extends ScaleGestureDetector.SimpleOnScaleGestureListen
         GLES32.glViewport(0,0, width, height);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onDrawFrame(GL10 glUnused){
         GLES32.glViewport(0,0,width, height);
@@ -65,6 +77,31 @@ public class AppRenderer extends ScaleGestureDetector.SimpleOnScaleGestureListen
             layerStack.get(i).onRender();
             GLES32.glClear( GLES32.GL_DEPTH_BUFFER_BIT);
         }
+        frameCount++;
+
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+        if (txtDebug != null) {
+
+            ((Activity) context).runOnUiThread(() -> {
+
+                txtDebug.setText(
+                        "FPS       : " +fps + "\n" +
+                                "Vertices  : " + scene.getVertexCount() + "\n" +
+                                "Triangles : " + scene.getTriangleCount() + "\n" +
+                                "Lines     : " + scene.getLineCount()+ "\n" +
+                            "OLines     : " + scene.getOLineCount()
+                );
+
+            });
+
+        }
+
     }
 
     public void onEvent(Event event){

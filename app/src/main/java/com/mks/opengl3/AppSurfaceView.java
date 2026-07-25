@@ -5,6 +5,7 @@ import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.widget.TextView;
 
 import com.mks.opengl3.events.ScaleEvent;
 import com.mks.opengl3.events.TouchDownEvent;
@@ -15,6 +16,7 @@ import com.mks.opengl3.math.Vec2;
 public class AppSurfaceView extends GLSurfaceView {
     AppRenderer appRenderer;
     Vec2 prevCoordinate;
+    private TextView txtDebug;
     ScaleGestureDetector scaleGestureDetector;
 
     public AppSurfaceView(Context context){
@@ -25,7 +27,10 @@ public class AppSurfaceView extends GLSurfaceView {
         setRenderer(appRenderer);
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
     }
-
+    public void setDebugTextView(TextView txtDebug) {
+        this.txtDebug = txtDebug;
+        appRenderer.setDebugTextView(txtDebug);
+    }
     public AppSurfaceView(Context context, AttributeSet attrs){
         super(context, attrs);
         setEGLContextClientVersion(3);

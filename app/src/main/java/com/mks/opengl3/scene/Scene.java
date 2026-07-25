@@ -53,7 +53,7 @@ public class Scene extends Layer {
                 R.drawable.b,
                 options);
 
-        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES,bitmap.getWidth(),bitmap.getHeight());
+        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.OLINES,bitmap.getWidth(),bitmap.getHeight());
         StandardMaterial3D material = new StandardMaterial3D(new StandardObject3DShader(context));
         material.setTextured(false);
 
@@ -61,7 +61,7 @@ public class Scene extends Layer {
 
         terrain = new Object3D(terrain_mesh, material);
 
-        terrain.setRenderMode(Object3D.LINES);
+        terrain.setRenderMode(Object3D.OLINES);
         root.addChild(terrain);
 
         blockRotating = false;
@@ -195,5 +195,34 @@ public class Scene extends Layer {
         this.terrain = object;
     }
 
+    public int getVertexCount() {
 
+        if (terrain == null || terrain.getMesh() == null)
+            return 0;
+
+        return terrain.getMesh().getVertexCount();
+    }
+
+    public int getTriangleCount() {
+
+        if (terrain == null || terrain.getMesh() == null)
+            return 0;
+
+        return terrain.getMesh().getTriangleCount();
+    }
+
+    public int getLineCount() {
+
+        if (terrain == null || terrain.getMesh() == null)
+            return 0;
+
+        return terrain.getMesh().getLineCount();
+    }
+    public int getOLineCount() {
+
+        if (terrain == null || terrain.getMesh() == null)
+            return 0;
+
+        return terrain.getMesh().getOLineCount();
+    }
 }

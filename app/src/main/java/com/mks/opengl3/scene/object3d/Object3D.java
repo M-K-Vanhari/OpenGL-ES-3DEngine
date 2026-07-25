@@ -138,6 +138,21 @@ public class Object3D {
 
             mesh.drawLines();
         }
+        if ((Object3D.renderMode & Object3D.LINEPOINTS) != 0) {
+            material.getShader().setTextured(false);
+            material.getShader().setUseVertexColor(false);
+                material.getShader().setUseVertexColor(true);
+                material.getShader().setColor(material.getColor());
+            mesh.drawLinePoints();
+        }
+        if ((Object3D.renderMode & Object3D.OLINES) != 0) {
+            material.getShader().setTextured(false);
+            material.getShader().setUseVertexColor(false);
+            material.getShader().setUseVertexColor(true);
+            material.getShader().setColor(material.getColor());
+            mesh.drawOLine();
+        }
+
 
 // ---------- Points ----------
         if ((Object3D.renderMode & Object3D.POINTS) != 0) {

@@ -20,7 +20,7 @@ public class TerrainMesh extends Mesh {
     private int[] triangleIndices;
     private int[] lineIndices;
 
-    public TerrainMesh(Bitmap bitmap,int drawmode,int width, int height) {
+    public TerrainMesh(Bitmap bitmap,int mode,int width, int height) {
         super(
                 bitmap == null
                         ? createVertices(width, height)
@@ -31,9 +31,11 @@ public class TerrainMesh extends Mesh {
 
             setTriangleIndices(createTriangleIndices(width,height));
             setLineIndices(createLineIndices(width,height));
-            if (bitmap != null)
-                setOLineIndices(createLineIndicesOptimized(createVerticesFromBitmap(bitmap),width,height));
-            if (drawmode == Object3D.LINEPOINTS)
+            if ((mode == Object3D.OLINES)) {
+                setOLineIndices(createLineIndicesOptimized(getVertices(), width, height));
+            }
+
+            if (mode == Object3D.LINEPOINTS)
             {
                 setVertices(createLinePointVertices(getVertices()));
                 setLinePointsIndices(createLinePointIndices(getVertices()));
@@ -45,11 +47,15 @@ public class TerrainMesh extends Mesh {
     private static int[] createLineIndicesOptimized(float[] vertices, int w, int h) {
         ArrayList<Integer> ind = new ArrayList<>();
         int stride = 15;
-
+        float tolerance = 0.1f;
         float[][][] zMatrix = new float[h][w][3];
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                zMatrix[y][x][0] = vertices[(y * w + x) * stride + 2];
+                float z = vertices[(y * w + x) * stride + 2];
+                z = ((int)(z / tolerance)) * tolerance;
+
+                zMatrix[y][x][0] = z;
+//                zMatrix[y][x][0] = vertices[(y * w + x) * stride + 2];
                 zMatrix[y][x][1] = 0.0f;
                 zMatrix[y][x][2] = y * w + x;
             }

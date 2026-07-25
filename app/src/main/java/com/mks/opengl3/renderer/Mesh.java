@@ -121,7 +121,7 @@ public abstract class Mesh {
 
         vertexArray.bind();
         triangleIBO.bind();
-
+        GLES32.glLineWidth(1.0f);
         GLES32.glDrawElements(
                 GLES32.GL_TRIANGLES,
                 triangleIBO.getCount(),
@@ -130,29 +130,89 @@ public abstract class Mesh {
     }
 
     public void drawLines() {
-
-        if (lineIBO == null)
+    if (lineIBO == null)
             return;
-
         vertexArray.bind();
         lineIBO.bind();
-
+        GLES32.glLineWidth(1.0f);
         GLES32.glDrawElements(
                 GLES32.GL_LINES,
                 lineIBO.getCount(),
                 GLES32.GL_UNSIGNED_INT,
                 0);
     }
-    public void drawPoints() {
-
-
+    public void drawLinePoints() {
+        if (linepointIBO == null)
+            return;
         vertexArray.bind();
-
+        linepointIBO.bind();
+        GLES32.glLineWidth(3.0f);
+        GLES32.glDrawElements(
+                GLES32.GL_LINES,
+                linepointIBO.getCount(),
+                GLES32.GL_UNSIGNED_INT,
+                0);
+    }
+    public void drawOLine() {
+        if (olineIBO == null)
+            return;
+        vertexArray.bind();
+        olineIBO.bind();
+        GLES32.glLineWidth(3.0f);
+        GLES32.glDrawElements(
+                GLES32.GL_LINES,
+                olineIBO.getCount(),
+                GLES32.GL_UNSIGNED_INT,
+                0);
+    }
+    public void drawPoints() {
+        vertexArray.bind();
         GLES32.glDrawElements(
                 GLES32.GL_POINTS,
                 lineIBO.getCount(),
                 GLES32.GL_UNSIGNED_INT,
                 0);
     }
+    public int getVertexCount() {
 
+        if (vertices == null)
+            return 0;
+
+        // هر ورتکس 15 float دارد:
+        // 3 Position
+        // 2 UV
+        // 3 Normal
+        // 3 Tangent
+        // 4 Color
+
+        return vertices.length / 15;
+    }
+    public int getTriangleCount() {
+
+        if (triangleIBO == null)
+            return 0;
+
+        return triangleIBO.getCount() / 3;
+    }
+    public int getLineCount() {
+
+        if (lineIBO == null)
+            return 0;
+
+        return lineIBO.getCount() / 2;
+    }
+    public int getOLineCount() {
+
+        if (olineIBO == null)
+            return 0;
+
+        return olineIBO.getCount() / 2;
+    }
+    public int getPointCount() {
+
+        if (pointIBO == null)
+            return 0;
+
+        return pointIBO.getCount();
+    }
 }
