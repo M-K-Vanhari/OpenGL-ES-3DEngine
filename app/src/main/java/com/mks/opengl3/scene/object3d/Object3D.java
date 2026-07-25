@@ -1,7 +1,6 @@
 package com.mks.opengl3.scene.object3d;
 
 import android.opengl.GLES32;
-import android.util.Log;
 
 import com.mks.opengl3.inertia.ExponentialFunction;
 import com.mks.opengl3.inertia.Inertia;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 
 public class Object3D {
     Mesh mesh;
-    StandardMaterial3D material;
+    public static StandardMaterial3D material;
 
     Vec3 position;
     Vec3 scale;
@@ -30,10 +29,14 @@ public class Object3D {
     Vec3 rotationVelocity;
     boolean rotating;
     Inertia inertia;
-    public static final int TRIANGLES = 0;
-    public static final int LINES = 1;
+    public static final int TRIANGLES = 1;
+    public static final int LINES = 2;
+    public static final int OLINES = 4;
+    public static final int POINTS = 16;
+    public static final int LINEPOINTS = 32;
 
-    private int renderMode = TRIANGLES;
+
+    public static int renderMode = TRIANGLES;
 
 
     public void setRenderMode(int mode){
@@ -41,7 +44,15 @@ public class Object3D {
         if (renderMode == TRIANGLES)
             showTriangles();
         else if (renderMode == LINES)
-            showWireframe();
+            showLine();
+        else if (renderMode == OLINES)
+            showOLine();
+        else if (renderMode == POINTS)
+            showPoint();
+        else if (renderMode == LINEPOINTS)
+            showLinePoint();
+
+
     }
     // If no material is given to the constructor, the standard material is assigned to the object.
     public Object3D(Mesh mesh, StandardObject3DShader shader){
@@ -50,7 +61,7 @@ public class Object3D {
 
     public Object3D(Mesh mesh, StandardMaterial3D material){
         this.mesh = mesh;
-        this.material = material;
+        Object3D.material = material;
 
         position = new Vec3();
         scale = new Vec3(1.0f);
@@ -62,7 +73,7 @@ public class Object3D {
         inertia = new Inertia();
 
         // Setting up model matrix. Only changes when object moves
-        this.material.getShader().setModel(worldModel);
+        Object3D.material.getShader().setModel(worldModel);
         updateWorldMatrix();
     }
 
@@ -82,48 +93,66 @@ public class Object3D {
 
     // Draws object to the screen
     public void onRender(Scene scene){
-
-        // Binding shader and make OpenGL calls
         material.getShader().bind();
-        // Sending material values to shader
+
+// ارسال Uniform ها
         material.getShader().setTextured(material.isTextured());
-        material.getShader().setColor(material.getColor());
         material.getShader().setNormalIntensity(material.getNormalIntensity());
         material.getShader().setRoughnessIntensity(material.getRoughnessIntensity());
-        // Sending matrices to shader
+
         material.getShader().setModel(worldModel);
         material.getShader().setView(scene.getCamera().getView());
         material.getShader().setProjection(scene.getCamera().getProjection());
-        //Sending lights to shader
+
         material.getShader().setPointLightPositions(scene.getPointLightPositions());
         material.getShader().setPointLightColors(scene.getPointLightColors());
         material.getShader().setAmbientLight(scene.getAmbientLight());
 
-        // Sending textures
-        if (material.getAlbedo() != null) {
-            GLES32.glActiveTexture(GLES32.GL_TEXTURE0);
-            GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, material.getAlbedo().getId());
+// ---------- Triangles ----------
+        if ((Object3D.renderMode & Object3D.TRIANGLES) != 0) {
+
+            GLES32.glEnable(GLES32.GL_POLYGON_OFFSET_FILL);
+            GLES32.glPolygonOffset(1.0f, 1.0f);
+
+            material.getShader().setTextured(material.isTextured());
+            material.getShader().setUseVertexColor(true);
+            material.getShader().setColor(material.getColor());
+
+            mesh.drawTriangles();
+
+            GLES32.glDisable(GLES32.GL_POLYGON_OFFSET_FILL);
         }
 
-        if (material.getNormal() != null) {
-            GLES32.glActiveTexture(GLES32.GL_TEXTURE1);
-            GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, material.getNormal().getId());
+// ---------- Lines ----------
+        if ((Object3D.renderMode & Object3D.LINES) != 0) {
+
+            material.getShader().setTextured(false);
+            material.getShader().setUseVertexColor(false);
+            if ((Object3D.renderMode & Object3D.TRIANGLES) != 0)
+                material.getShader().setColor(new Vec4(0, 0, 0, 1));
+            else
+            {
+                material.getShader().setUseVertexColor(true);
+                material.getShader().setColor(material.getColor());
+            }
+
+            mesh.drawLines();
         }
 
-        if (material.getRoughness() != null) {
-            GLES32.glActiveTexture(GLES32.GL_TEXTURE2);
-            GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, material.getRoughness().getId());
-        }
-        if(renderMode == TRIANGLES)
-        {
-            mesh.useTriangles();
-        }
-        else
-        {
-            mesh.useLines();
+// ---------- Points ----------
+        if ((Object3D.renderMode & Object3D.POINTS) != 0) {
+
+            material.getShader().setTextured(false);
+            material.getShader().setUseVertexColor(false);
+            material.getShader().setColor(new Vec4(1, 0, 0, 1));
+
+            mesh.drawPoints();
         }
 
+// بازگرداندن وضعیت Material
+        material.getShader().setTextured(material.isTextured());
         mesh.onRender();
+
         material.getShader().unbind();
     }
 
@@ -147,13 +176,13 @@ public class Object3D {
     }
     public void rotate(Vec4 rotation){
 
-            localModel = Mat4.multiply(
-                    Mat4.rotation(rotation.getVec3(), rotation.w),
-                    localModel);
+        localModel = Mat4.multiply(
+                Mat4.rotation(rotation.getVec3(), rotation.w),
+                localModel);
 
-            updateWorldMatrix();
+        updateWorldMatrix();
 
-     }
+    }
 
     public void translate(Vec3 translation){
         position.add(translation);
@@ -184,10 +213,17 @@ public class Object3D {
     public Mesh getMesh(){
         return mesh;
     }
-    public void showWireframe() {
+    public void showLine() {
         mesh.useLines();
     }
-
+    public void showOLine() {
+        mesh.useOLines();
+    }
+    public void showPoint() {
+        mesh.usePoints();
+    }public void showLinePoint() {
+        mesh.useLinePoints();
+    }
     public void showTriangles() {
         mesh.useTriangles();
     }
@@ -204,27 +240,27 @@ public class Object3D {
     public Vec3 getPosition(){
         return position;
     }
-/*
-    public void setPosition(Vec3 position){
-        this.position = position;
-        model.x4 = position.x;
-        model.y4 = position.y;
-        model.z4 = position.z;
-        shader.setModel(model);
-    }
+    /*
+        public void setPosition(Vec3 position){
+            this.position = position;
+            model.x4 = position.x;
+            model.y4 = position.y;
+            model.z4 = position.z;
+            shader.setModel(model);
+        }
 
-    public Vec3 getScale() {
-        return scale;
-    }
+        public Vec3 getScale() {
+            return scale;
+        }
 
-    public void setScale(Vec3 scale) {
-        this.scale = scale;
-        model.x1 = scale.x;
-        model.y2 = scale.y;
-        model.z3 = scale.z;
-        shader.setModel(model);
-    }
-*/
+        public void setScale(Vec3 scale) {
+            this.scale = scale;
+            model.x1 = scale.x;
+            model.y2 = scale.y;
+            model.z3 = scale.z;
+            shader.setModel(model);
+        }
+    */
     public Vec4 getRotation(){
         return rotation;
     }

@@ -21,6 +21,7 @@ uniform vec3 uPointLightPositons[1];
 uniform vec3 uPointLightColors[1];
 uniform vec3 uAmbientLight;
 uniform bool uTextured;
+uniform bool uUseVertexColor;
 
 float calculateBlinnPhong(vec3 tangentPointLightPosition, vec3 normal, float exponent){
     // Calculating diffuse lighting
@@ -57,7 +58,10 @@ if (uTextured) {
 } else {
     color = uColor.rgb;
     normal = vec3(0.0, 0.0, 1.0);
-    fragColor = vIn.color;
+    if (uUseVertexColor)
+        fragColor = vIn.color;
+    else
+        fragColor = uColor;
 }
     // Get values from textures
    // vec3 color = texture(uAlbedo, vIn.texCoord).rgb;

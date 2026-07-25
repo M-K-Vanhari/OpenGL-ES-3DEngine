@@ -14,7 +14,7 @@ public class VertexBuffer implements Buffer{
         layout = new BufferLayout(new ArrayList<BufferElement>());
         GLES32.glGenBuffers(1, vboId, 0);
         GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vboId[0]);
-        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, size, vertices, GLES32.GL_STATIC_DRAW);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, size, vertices, GLES32.GL_DYNAMIC_DRAW);
     }
 
     public VertexBuffer(float[] vertices, BufferLayout bufferLayout){
@@ -25,7 +25,7 @@ public class VertexBuffer implements Buffer{
 
         GLES32.glGenBuffers(1, vboId, 0);
         GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vboId[0]);
-        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuffer, GLES32.GL_STATIC_DRAW);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuffer, GLES32.GL_DYNAMIC_DRAW);
     }
 
     public void bind(){
@@ -46,5 +46,25 @@ public class VertexBuffer implements Buffer{
 
     public void setBufferLayout(BufferLayout layout){
         this.layout = layout;
+    }
+    public void setData(float[] vertices) {
+
+        FloatBuffer vertexBuffer = ByteBuffer
+                .allocateDirect(vertices.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+
+        vertexBuffer.put(vertices);
+        vertexBuffer.position(0);
+
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vboId[0]);
+
+        // جایگزین کردن داده‌های VBO
+        GLES32.glBufferData(
+                GLES32.GL_ARRAY_BUFFER,
+                vertices.length * 4,
+                vertexBuffer,
+                GLES32.GL_DYNAMIC_DRAW
+        );
     }
 }

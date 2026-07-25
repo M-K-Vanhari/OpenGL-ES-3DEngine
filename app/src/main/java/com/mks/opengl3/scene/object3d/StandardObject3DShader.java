@@ -18,6 +18,7 @@ public class StandardObject3DShader extends Object3DShader {
     Uniform pointLightPositions;
     Uniform pointLightColors;
     Uniform ambientLight;
+    Uniform usevertexColor;
     public StandardObject3DShader(Context context) {
         super(context, "shaders/StandardObjectShader.vs", "shaders/StandardObjectShader.fs");
         textured = new Uniform("uTextured", shaderProgramId);
@@ -30,8 +31,12 @@ public class StandardObject3DShader extends Object3DShader {
         pointLightPositions = new Uniform("uPointLightPositions", new Mat4(), shaderProgramId);
         pointLightColors = new Uniform("uPointLightColors", new Mat4(), shaderProgramId);
         ambientLight = new Uniform("uAmbientLight", new Vec3(), shaderProgramId);
+        usevertexColor = new Uniform("uUseVertexColor", shaderProgramId);
     }
-
+    public void setUseVertexColor(boolean use) {
+        usevertexColor.setObject(use);
+        usevertexColor.sendToShader();
+    }
     public void setTextured(boolean isTextured){
         textured.setObject(isTextured);
         textured.sendToShader();
@@ -44,6 +49,7 @@ public class StandardObject3DShader extends Object3DShader {
         this.color.setObject(color);
         this.color.sendToShader();
     }
+
     public void setAlbedoLocation(int location){
         albedo.setObject(location);
         albedo.sendToShader();

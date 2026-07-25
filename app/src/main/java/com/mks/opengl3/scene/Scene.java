@@ -1,7 +1,12 @@
 package com.mks.opengl3.scene;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.DisplayMetrics;
 
+import com.mks.opengl3.MainActivity;
+import com.mks.opengl3.R;
 import com.mks.opengl3.events.Event;
 import com.mks.opengl3.events.EventDispatcher;
 import com.mks.opengl3.events.ScaleEvent;
@@ -12,15 +17,10 @@ import com.mks.opengl3.events.WindowResizeEvent;
 import com.mks.opengl3.layers.Layer;
 import com.mks.opengl3.math.Vec3;
 import com.mks.opengl3.math.Vec4;
-import com.mks.opengl3.renderer.Mesh;
-import com.mks.opengl3.renderer.Texture;
-import com.mks.opengl3.scene.object3d.Cube;
 import com.mks.opengl3.scene.object3d.Object3D;
-import com.mks.opengl3.scene.object3d.Plane;
 import com.mks.opengl3.scene.object3d.StandardMaterial3D;
 import com.mks.opengl3.scene.object3d.StandardObject3DShader;
 import com.mks.opengl3.scene.object3d.TerrainMesh;
-import com.mks.opengl3.scene.object3d.WireCube;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,10 +30,7 @@ public class Scene extends Layer {
     Camera camera;
     PointLight[] pointLights;
     Vec3 ambientLight;
-    Object3D object;
-    Object3D object1;
-    Object3D obj;
-    Object3D plt;
+    Object3D terrain;
 
     boolean blockRotating;
     Timer timer;
@@ -47,45 +44,25 @@ public class Scene extends Layer {
         pointLights[0] = new PointLight(new Vec3(1.0f, 0.0f, 1.0f), new Vec3(1.0f, 1.0f, 1.0f), 1.25f);
         ambientLight = new Vec3(0.25f, 0.25f, 0.25f);
 
-        // Creating a cube
-        // Creating mesh
-        Mesh mesh = new WireCube();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inTargetDensity = DisplayMetrics.DENSITY_DEFAULT; // برابر 160
+        options.inDensity = DisplayMetrics.DENSITY_DEFAULT;
+        options.inScaled = false; // غیرفعال کردن کامل مقیاس
+        Bitmap bitmap = BitmapFactory.decodeResource(
+                MainActivity.getInstance().getResources(),
+                R.drawable.b,
+                options);
+
+        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES,bitmap.getWidth(),bitmap.getHeight());
         StandardMaterial3D material = new StandardMaterial3D(new StandardObject3DShader(context));
         material.setTextured(false);
 
-        material.setColor(new Vec4(1.0f, 0.0f, 0.0f,1.0f)); // قرمز
-        // Creating Object
-        object = new Object3D(mesh,material);
+        material.setColor(new Vec4(1.0f, 1.0f, 0.0f,1.0f)); // قرمز
 
-        Mesh mesh1 = new Cube();
-        StandardMaterial3D material1 = new StandardMaterial3D(new StandardObject3DShader(context));
-      //  material1.setTextured(false);
+        terrain = new Object3D(terrain_mesh, material);
 
-       // material1.setColor(new Vec4(1.0f, 0.0f, 0.0f,1.0f)); // قرمز
-        // Creating Object
-        object1 = new Object3D(mesh1,material1);
-
-
-        TerrainMesh me = new TerrainMesh(32,32);
-        StandardMaterial3D ml = new StandardMaterial3D(new StandardObject3DShader(context));
-        ml.setTextured(false);
-
-        ml.setColor(new Vec4(1.0f, 1.0f, 0.0f,1.0f)); // قرمز
-
-        obj = new Object3D(me, ml);
-
-        obj.setRenderMode(Object3D.LINES);
-        Plane pl = new Plane(32,32);
-        StandardMaterial3D pm = new StandardMaterial3D(new StandardObject3DShader(context));
-        pm.setTextured(false);
-
-        pm.setColor(new Vec4(1.0f, 0.0f, 1.0f,1.0f)); // قرمز
-
-        plt = new Object3D(pl, pm);
-        root.addChild(plt);
-        root.addChild(obj);
-        root.addChild(object);
-        root.addChild(object1);
+        terrain.setRenderMode(Object3D.LINES);
+        root.addChild(terrain);
 
         blockRotating = false;
         timer = new Timer();
@@ -110,17 +87,11 @@ public class Scene extends Layer {
 
     public void onRender(){
         sceneNode.update();
-      //  object.onRender(this);
-      //  object1.onRender(this);
-       // obj.onRender(this);
-
-
-        obj.onRender(this);
+        terrain.onRender(this);
     }
 
     public void onUpdate(){
         root.onUpdate();
-      //  object1.onUpdate();
         camera.onUpdate();
     }
 
@@ -131,8 +102,6 @@ public class Scene extends Layer {
     public boolean onTouchUpEvent(TouchUpEvent e){
         root.setRotating(false);
         root.startDeceleration();
-       // object1.setRotating(false);
-       // object1.startDeceleration();
         camera.startDeceleration();
         // Blocking rotation for 0.05 seconds
         timer.schedule(new TimerTask(){ public void run(){ blockRotating = false; }}, 50);
@@ -141,7 +110,6 @@ public class Scene extends Layer {
     public boolean onTouchMoveEvent(TouchMoveEvent e){
         if(!blockRotating) {
             root.setRotating(true);
-//            object1.setRotating(true);
             rotateObject(e.getDX(), e.getDY());
         }
         return true;
@@ -220,11 +188,11 @@ public class Scene extends Layer {
     }
 
     public Object3D getObject(){
-        return object;
+        return terrain;
     }
 
     public void setObject(Object3D object){
-        this.object = object;
+        this.terrain = object;
     }
 
 

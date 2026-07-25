@@ -7,10 +7,12 @@ import android.view.WindowManager;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static MainActivity instance;
     AppSurfaceView appSurfaceView;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        instance = this;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         appSurfaceView = (AppSurfaceView) findViewById(R.id.appSurfaceView);
@@ -26,5 +28,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause(){
         super.onPause();
         appSurfaceView.onPause();
+    }
+    public static MainActivity getInstance() {
+        return instance;
     }
 }

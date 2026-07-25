@@ -1,23 +1,79 @@
-# GLARE - GL Android Rendering Engine
-GLARE is a 3D rendering engine for Android devices supporting OpenGL ES 3 written in Java. It is completely written from scratch and does not use any external libraries. It currently displays a cube with a tile texture that can be easily swapped out in code. The current APK of the demo can be downloaded [here](https://github.com/david-palm/GLARE/releases/download/stable/glare_stable_v0.1.apk)!
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/109848051/212898975-279f065b-6efa-46c4-825b-6b0994447420.png" height="500px">
-</p>
+# GLARE Extended -- Android OpenGL ES Rendering Engine
+
+This repository is based on the original **GLARE** project by **David
+Palm**.
+
+The original project provided a Java-based 3D rendering engine for
+Android using **OpenGL ES 3**, written completely from scratch without
+external rendering libraries.
+
+I used the original project as a foundation and significantly extended
+it to explore advanced rendering techniques and engine architecture.
+This repository represents my personal development work and is intended
+as a portfolio project for software engineering interviews.
+
+## Original Project
+
+Original Repository: https://github.com/david-palm/GLARE
+
+Full credit goes to the original author for the initial engine
+architecture.
+
+## Major Enhancements
+
+-   Complete mesh generation system
+-   Triangle and wireframe rendering modes
+-   Runtime switching between rendering modes
+-   Dynamic index buffer management
+-   Custom geometry generation
+-   Improved rendering pipeline
+-   Object transformation improvements
+-   Camera and interaction enhancements
+-   Engine architecture refactoring
+-   Rendering performance optimizations
+-   Additional debugging and visualization tools
+-   Various bug fixes and code improvements
+
+## Purpose
+
+-   Learning advanced OpenGL ES rendering
+-   Experimenting with graphics engine architecture
+-   Demonstrating software engineering skills
+-   Portfolio project for technical interviews
+
+## Technologies
+
+-   Java
+-   Android SDK
+-   OpenGL ES 3
+-   GLSL
+-   Vertex Buffer Objects (VBO)
+-   Index Buffer Objects (IBO)
+-   Shader Programming
+-   Matrix Mathematics
+
+## Acknowledgements
+
+This project is based on the original GLARE engine developed by David
+Palm.
+
+I greatly appreciate the original work and have used it as the starting
+point for my own research, experimentation, and feature development.
 
 
-## Rendering
-GLARE allows the user to render 3D meshes as well as 2D UI elements:
-- 3D objects have materials consisting of an albedo map or a color, a normal map, and a roughness map
-- Point and ambient lights illuminate the scene using Blinn-Phong lighting
-- 2D UI elements have materials that have either a color or a texture
-- Currently does not support text rendering
+## Enhancements by Mohsen Kazemi
 
-## Event and layer system
-- Custom event system wraps window and user input events and forwards them to the correct layer
-- Layer system blocks user input if its already handled
+This project is based on the original open-source repository.
 
-## Inertia system
-The inertia system allows the user to rotate the cube and zoom the camera but can easily be attached to any property of any object in code.
-- Inertia system allows custom behavior after the user moved an object
-- The length of the inertia as well as the form can be customized by using different mathematical functions
-- Inertia can be added to 3D objects as well as UI elements or camera controls
+The following features were designed and implemented by me:
+
+- Bitmap-based terrain generation.
+- Dynamic mesh update.
+- Triangle / Line / Point rendering modes.
+- Simultaneous Triangle + Wireframe rendering.
+- Wireframe color override.
+- Optimized line index generation.
+- Runtime vertex buffer update.
+- Extended rendering pipeline.
+- Terrain editing support.
+- Performance optimizations.

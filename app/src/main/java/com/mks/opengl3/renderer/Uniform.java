@@ -45,6 +45,9 @@ public class Uniform {
         if(object instanceof Integer){
             GLES32.glUniform1i(id, (int) object);
         }
+        if (object instanceof Boolean) {
+            GLES32.glUniform1i(id, (Boolean) object ? 1 : 0);
+        }
         if(object instanceof Float){
             GLES32.glUniform1f(id, (float) object);
         }

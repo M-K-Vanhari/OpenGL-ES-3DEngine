@@ -38,8 +38,8 @@ public class AppRenderer extends ScaleGestureDetector.SimpleOnScaleGestureListen
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig){
         layerStack.add(new Scene(context));
         // Creating UI test
-        UI ui = new UI(context);
-        ui.addToLayerStack(layerStack);
+      //  UI ui = new UI(context);
+      //  ui.addToLayerStack(layerStack);
         GLES32.glEnable(GLES32.GL_DEPTH_TEST);
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask(){ public void run(){onUpdate();}}, 0, 16);
