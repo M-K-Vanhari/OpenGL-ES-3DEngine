@@ -12,17 +12,23 @@ public class GreedyMesher {
     private boolean[][] visited;
 
     private ArrayList<Float> vertices;
-    private ArrayList<Integer> indices;
+    private ArrayList<Integer> triangleIndices;
+    private ArrayList<Integer> lineIndices;
 
-    private int currentVertexIndex;
+    private int currentTriangleVertexIndex;
+    private int currentLineVertexIndex;
+
     public class MeshData {
 
         public float[] vertices;
-        public int[] indices;
+        public int[] triangleIndices;
+        public int[] lineIndices;
 
-        public MeshData(float[] vertices, int[] indices) {
+        public MeshData(float[] vertices, int[] triangleIndices,int[]  lineIndices) {
             this.vertices = vertices;
-            this.indices = indices;
+            this.triangleIndices = triangleIndices;
+            this.lineIndices = lineIndices;
+
         }
 
     }
@@ -60,7 +66,8 @@ public class GreedyMesher {
 
         return new MeshData(
                 toFloatArray(vertices),
-                toIntArray(indices));
+                toIntArray(triangleIndices),
+                toIntArray(lineIndices));
 
     }
     private boolean equalHeight(float a, float b){
@@ -76,9 +83,10 @@ public class GreedyMesher {
         visited = new boolean[height][width];
 
         vertices = new ArrayList<>();
-        indices = new ArrayList<>();
+        triangleIndices = new ArrayList<>();
+        lineIndices = new ArrayList<>();
 
-        currentVertexIndex = 0;
+        currentTriangleVertexIndex = 0;
     }
     private void addVertex(
             float px,
@@ -182,15 +190,32 @@ public class GreedyMesher {
         // دو مثلث
         //---------------------------------------
 
-        indices.add(currentVertexIndex);
-        indices.add(currentVertexIndex + 1);
-        indices.add(currentVertexIndex + 2);
+        triangleIndices.add(currentTriangleVertexIndex);
+        triangleIndices.add(currentTriangleVertexIndex + 1);
+        triangleIndices.add(currentTriangleVertexIndex + 2);
 
-        indices.add(currentVertexIndex);
-        indices.add(currentVertexIndex + 2);
-        indices.add(currentVertexIndex + 3);
+        triangleIndices.add(currentTriangleVertexIndex);
+        triangleIndices.add(currentTriangleVertexIndex + 2);
+        triangleIndices.add(currentTriangleVertexIndex + 3);
 
-        currentVertexIndex += 4;
+        currentTriangleVertexIndex += 4;
+
+
+        lineIndices.add(currentLineVertexIndex);
+        lineIndices.add(currentLineVertexIndex + 1);
+        lineIndices.add(currentLineVertexIndex);
+        lineIndices.add(currentLineVertexIndex + 3);
+        lineIndices.add(currentLineVertexIndex + 3);
+        lineIndices.add(currentLineVertexIndex + 2);
+        lineIndices.add(currentLineVertexIndex + 1);
+        lineIndices.add(currentLineVertexIndex + 2);
+
+
+
+        currentLineVertexIndex += 4;
+
+
+
     }
     private Rectangle findLargestRectangle(int startX,int startY){
 
@@ -207,7 +232,7 @@ public class GreedyMesher {
             if(visited[startY][startX+width])
                 break;
 
-            if(equalHeight (zMatrix[startY][startX+width].pz , z))
+            if(!equalHeight (zMatrix[startY][startX+width].pz , z))
                 break;
 
             width++;
@@ -236,7 +261,7 @@ public class GreedyMesher {
 
                 }
 
-                if(equalHeight(zMatrix[startY+height][startX+x].pz,z)){
+                if(!equalHeight(zMatrix[startY+height][startX+x].pz,z)){
 
                     expand=false;
                     break;

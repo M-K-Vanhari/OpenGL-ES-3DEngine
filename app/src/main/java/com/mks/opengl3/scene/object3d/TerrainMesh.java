@@ -43,7 +43,8 @@ public class TerrainMesh extends Mesh {
         GreedyMesher m =new GreedyMesher(vr);
         GreedyMesher.MeshData md = m.build();
         setVertices(md.vertices);
-        setLinePointsIndices(md.indices);
+        setTriangleIndices(md.triangleIndices);
+        setLineIndices(md.lineIndices);
     }
 
     static class ZData {
