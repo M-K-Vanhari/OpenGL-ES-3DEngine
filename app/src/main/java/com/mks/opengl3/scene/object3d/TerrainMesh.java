@@ -16,9 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TerrainMesh extends Mesh {
-
-    private int[] triangleIndices;
-    private int[] lineIndices;
+    Vertex[][] vertices;
+    private static final float HEIGHT_TOLERANCE = 0.1f;
 
     public TerrainMesh(Bitmap bitmap,int mode,int width, int height) {
         super(
@@ -39,12 +38,20 @@ public class TerrainMesh extends Mesh {
             setLinePointsIndices(createLinePointIndices(getVertices()));
         }
 
-        Vertex[][] vr=Vertex.fromFloatArray(getVertices(),width,height);
-        GreedyMesher m =new GreedyMesher(vr);
-        GreedyMesher.MeshData md = m.build();
+        vertices=Vertex.fromFloatArray(getVertices(),width,height);
+//        GreedyMesher m =new GreedyMesher(vertices);
+//        GreedyMesher.MeshData md = m.build(GreedyMesher.Mode.SQUARE);
+//        setVertices(md.vertices);
+//        setTriangleIndices(md.triangleIndices);
+//        setLineIndices(md.lineIndices);
+        ContourGenerator m =new ContourGenerator(vertices);
+        ContourGenerator.MeshData md = m.build(0.1f,false,true,true);
         setVertices(md.vertices);
         setTriangleIndices(md.triangleIndices);
         setLineIndices(md.lineIndices);
+    }
+    private static float quantizeHeight(float z) {
+        return Math.round(z / HEIGHT_TOLERANCE) * HEIGHT_TOLERANCE;
     }
 
     static class ZData {
@@ -330,10 +337,12 @@ public class TerrainMesh extends Mesh {
                 float px = x * sx - 1.5f;
                 float py = y * sy - 1.5f;
                 //   float pz = (r + g + b) / 3.0f * 2.0f - 1.0f; // ارتفاع بر اساس روشنایی
-                float pz = (float)Math.sqrt(
-                        (r - 0f) * (r - 0f) +
-                                (g - 1f) * (g - 1f) +
-                                (b - 0f) * (b - 0f)
+                float pz = quantizeHeight(
+                        (float)Math.sqrt(
+                                (r - 0f) * (r - 0f) +
+                                        (g - 1f) * (g - 1f) +
+                                        (b - 0f) * (b - 0f)
+                        )
                 );
                 // position
                 data.add(px);
@@ -463,4 +472,5 @@ public class TerrainMesh extends Mesh {
 
         return layout;
     }
+
 }
