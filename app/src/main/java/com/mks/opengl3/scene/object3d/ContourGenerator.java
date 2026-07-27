@@ -8,7 +8,8 @@ public class ContourGenerator {
     //---------------------------------------
     // Input
     //---------------------------------------
-
+    private ArrayList<ContourPoint> currentContour =
+            new ArrayList<>();
     private Vertex[][] vertices;
     private boolean buildRoof;
     private boolean buildWalls;
@@ -91,6 +92,7 @@ public class ContourGenerator {
         float g;
         float b;
         float a;
+        int vertexIndex = -1;
 
     }
     private  static class VertexKey{
@@ -288,8 +290,77 @@ public class ContourGenerator {
 
         return array;
     }
+//    private ArrayList<ContourPoint> sortContour(
+//            ArrayList<ContourPoint> points){
+//
+//        ArrayList<ContourPoint> polygon =
+//                new ArrayList<>();
+//
+//        if(points.isEmpty())
+//            return polygon;
+//
+//        polygon.add(points.get(0));
+//
+//        points.remove(0);
+//
+//        while(!points.isEmpty()){
+//
+//            ContourPoint last =
+//                    polygon.get(polygon.size()-1);
+//
+//            int found = -1;
+//
+//            for(int i=0;i<points.size();i++){
+//
+//                ContourPoint p = points.get(i);
+//
+//                if(equal(last.x,p.x) &&
+//                        equal(last.y,p.y))
+//                    continue;
+//
+//                float dx = last.x-p.x;
+//                float dy = last.y-p.y;
+//
+//                if(dx*dx+dy*dy<0.000001f){
+//
+//                    found=i;
+//                    break;
+//
+//                }
+//
+//            }
+//
+//            if(found==-1)
+//                break;
+//
+//            polygon.add(points.remove(found));
+//
+//        }
+//
+//        return polygon;
+//
+//    }
+//    private void buildRoof(){
+//
+//        ArrayList<Integer> polygon =
+//                sortContour();
+//
+//        if(polygon.size()<3)
+//            return;
+//
+//        int root = polygon.get(0);
+//
+//        for(int i=1;i<polygon.size()-1;i++){
+//
+//            triangleIndices.add(root);
+//            triangleIndices.add(polygon.get(i));
+//            triangleIndices.add(polygon.get(i+1));
+//
+//        }
+//
+//    }
     private void processLevel(float level){
-
+        currentContour.clear();
         for(int y=0;y<height-1;y++){
 
             for(int x=0;x<width-1;x++){
@@ -302,6 +373,14 @@ public class ContourGenerator {
             }
 
         }
+
+//            if(buildRoof){
+//
+//                buildRoof(currentContour);
+//
+//
+//
+//        }
 
     }
     //------------------------------------------------------
@@ -380,7 +459,8 @@ public class ContourGenerator {
                         p0,
                         p1,
                         level);
-
+                currentContour.add(p0);
+         currentContour.add(p1);
             }
 
             if(buildWalls){
