@@ -148,30 +148,7 @@ public class GreedyMesher {
 
     }
 
-    //----------------------------------------------------
-    // MeshData
-    //----------------------------------------------------
 
-    public static class MeshData{
-
-        public final float[] vertices;
-
-        public final int[] triangleIndices;
-
-        public final int[] lineIndices;
-
-        public MeshData(
-                float[] vertices,
-                int[] triangleIndices,
-                int[] lineIndices){
-
-            this.vertices=vertices;
-            this.triangleIndices=triangleIndices;
-            this.lineIndices=lineIndices;
-
-        }
-
-    }
 
     //----------------------------------------------------
     // Rectangle

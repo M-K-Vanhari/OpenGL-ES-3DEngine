@@ -45,10 +45,11 @@ public class TerrainMesh extends Mesh {
 //        setTriangleIndices(md.triangleIndices);
 //        setLineIndices(md.lineIndices);
         ContourGenerator m =new ContourGenerator(vertices);
-        ContourGenerator.MeshData md = m.build(0.1f,true,true,true);
+        ContourGenerator.MeshData md = m.build(0.1f,true,false,true);
         setVertices(md.vertices);
         setTriangleIndices(md.triangleIndices);
         setLineIndices(md.lineIndices);
+
     }
     private static float quantizeHeight(float z) {
         return Math.round(z / HEIGHT_TOLERANCE) * HEIGHT_TOLERANCE;
