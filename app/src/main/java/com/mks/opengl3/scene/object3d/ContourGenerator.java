@@ -1,7 +1,10 @@
 package com.mks.opengl3.scene.object3d;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class ContourGenerator {
 
@@ -10,22 +13,21 @@ public class ContourGenerator {
     //---------------------------------------
     private ArrayList<ContourPoint> currentContour =
             new ArrayList<>();
-    private ArrayList<Integer[][]> roofIndices =
+    private ArrayList<Integer> roofIndices =
             new ArrayList<>();
-    private int vertexCount=0;
 
     private MeshData MeshData;
     private final ArrayList<Vertex> roofVertices =
             new ArrayList<>();
 
-    private final HashMap<RoofVertexKey, Integer> roofVertexMap =
-            new HashMap<>();
+
     private Vertex[][] vertices;
     private boolean buildRoof;
     private boolean buildWalls;
     private boolean buildLines;
     private boolean[][] levelMask;
     private float interval;
+
 
     private int width;
     private int height;
@@ -73,9 +75,6 @@ public class ContourGenerator {
     public static class MeshData{
 
         public final float[] vertices;
-
-
-
         public int[] lineIndices;
 
         public int[] triangleIndices;
@@ -105,74 +104,75 @@ public class ContourGenerator {
         int vertexIndex = -1;
 
     }
-    private  static class VertexKey{
+    private static class VertexKey {
 
-        float x;
-        float y;
-        float z;
+        private static final float EPS = 0.0001f;
 
-        float r;
-        float g;
-        float b;
-        float a;
+        int x;
+        int y;
+        int z;
+
+        int r;
+        int g;
+        int b;
+        int a;
 
         VertexKey(
-                float x,
-                float y,
-                float z,
-                float r,
-                float g,
-                float b,
-                float a){
+                float px,
+                float py,
+                float pz,
+                float pr,
+                float pg,
+                float pb,
+                float pa) {
 
-            this.x=x;
-            this.y=y;
-            this.z=z;
+            x = Math.round(px / EPS);
+            y = Math.round(py / EPS);
+            z = Math.round(pz / EPS);
 
-            this.r=r;
-            this.g=g;
-            this.b=b;
-            this.a=a;
+            r = Math.round(pr * 255f);
+            g = Math.round(pg * 255f);
+            b = Math.round(pb * 255f);
+            a = Math.round(pa * 255f);
         }
 
         @Override
-        public boolean equals(Object o){
+        public boolean equals(Object o) {
 
-            if(this==o)
+            if (this == o)
                 return true;
 
-            if(!(o instanceof VertexKey))
+            if (!(o instanceof VertexKey))
                 return false;
 
-            VertexKey k=(VertexKey)o;
+            VertexKey k = (VertexKey) o;
 
-            return Float.compare(x,k.x)==0 &&
-                    Float.compare(y,k.y)==0 &&
-                    Float.compare(z,k.z)==0 &&
-                    Float.compare(r,k.r)==0 &&
-                    Float.compare(g,k.g)==0 &&
-                    Float.compare(b,k.b)==0 &&
-                    Float.compare(a,k.a)==0;
+            return x == k.x &&
+                    y == k.y &&
+                    z == k.z &&
+                    r == k.r &&
+                    g == k.g &&
+                    b == k.b &&
+                    a == k.a;
         }
 
         @Override
-        public int hashCode(){
+        public int hashCode() {
 
-            int h=17;
+            int h = 17;
 
-            h=31*h+Float.floatToIntBits(x);
-            h=31*h+Float.floatToIntBits(y);
-            h=31*h+Float.floatToIntBits(z);
+            h = 31 * h + x;
+            h = 31 * h + y;
+            h = 31 * h + z;
 
-            h=31*h+Float.floatToIntBits(r);
-            h=31*h+Float.floatToIntBits(g);
-            h=31*h+Float.floatToIntBits(b);
-            h=31*h+Float.floatToIntBits(a);
+            h = 31 * h + r;
+            h = 31 * h + g;
+            h = 31 * h + b;
+            h = 31 * h + a;
 
             return h;
         }
     }
-
 
     //----------------------------------------------------
 // Build Contour Lines
@@ -247,21 +247,21 @@ public class ContourGenerator {
         // تولید خطوط میزان
         //---------------------------------------
 
-        for(float level = firstLevel;
-            level <= maxHeight;
-            level += interval){
+//        for(float level = firstLevel;
+//            level <= maxHeight;
+//            level += interval){
+//
+//            processLevel(level);
+//
+//        }
 
-            processLevel(level);
 
-        }
+            processLevel(1.0f);
         if(buildRoof){
 
-            buildRoofs();
 
         }
-        //---------------------------------------
-        // خروجی
-        //---------------------------------------
+
 
         return new MeshData(
 
@@ -304,11 +304,8 @@ public class ContourGenerator {
     private void processLevel(float level){
         currentContour.clear();
         roofIndices.clear();
-        vertexCount=0;
         for(int y=0;y<height-1;y++){
-
             for(int x=0;x<width-1;x++){
-
                 processCell(
                         x,
                         y,
@@ -319,54 +316,236 @@ public class ContourGenerator {
         }
 
         if(buildRoof) {
-            System.out.println(currentContour);
-            System.out.println(roofIndices);
-        }
+            Log.d("CONTOUR", "========== LINES ==========");
+
+            for (int i = 0; i < roofIndices.size(); i += 2) {
+
+                int i0 = roofIndices.get(i);
+                int i1 = roofIndices.get(i + 1);
+
+                ContourPoint p0 = currentContour.get(i);
+                ContourPoint p1 = currentContour.get(i + 1);
+
+                Log.d("CONTOUR",
+                        i0 + " : (" + p0.x + "," + p0.y + ")  ->  " +
+                                i1 + " : (" + p1.x + "," + p1.y + ")");
+
+            }
+            ArrayList<ArrayList<Integer>> segments =
+                    getSegmentsFromLineIndices(toIntArray(roofIndices));
+
+            for (ArrayList<Integer> segment : segments) {
+
+                //----------------------------------
+                // ساخت Polygon
+                //----------------------------------
+
+                ArrayList<Vertex> polygon =
+                        new ArrayList<>();
+
+                for (Integer index : segment) {
+                    polygon.add(toVertex(currentContour.get(index)));
+                }
+
+                //----------------------------------
+                // مش بندی
+                //----------------------------------
+
+                DelaunayMesher mesher =
+                        new DelaunayMesher();
+
+                DelaunayMesher.MeshData M =
+                        mesher.triangulate(toVertexArray(polygon));
+
+
+                int[] globalIndices = new int[M.vertices.length/15];
+
+                for (int i = 0; i < M.vertices.length/15; i++) {
+
+                    globalIndices[i] = getVertexIndex(
+
+                            M.vertices[i * 15],
+                            M.vertices[i * 15+1],
+                            M.vertices[i * 15+2],
+
+                            M.vertices[i * 15+10],
+                            M.vertices[i * 15+11],
+                            M.vertices[i * 15+12],
+                            M.vertices[i * 15+13]
+
+                    );
+
+                }
+
+//----------------------------------
+// اضافه کردن مثلث ها
+//----------------------------------
+
+                for (int i = 0; i < M.triangleIndices.length; i++) {
+
+                    triangleIndices.add(
+
+                            globalIndices[
+                                    M.triangleIndices[i]
+                                    ]
+
+                    );
+
+                }
+
+
+            }
+            for (int i = 0; i < segments.size(); i++) {
+
+                ArrayList<Integer> seg = segments.get(i);
+
+                Log.d("SEGMENT", "========== Segment " + i + " ==========");
+
+                for (int j = 0; j < seg.size(); j++) {
+
+                    Log.d("SEGMENT",
+                            j + " : " + seg.get(j));
+
+                }
+            }
+      }
     }
 
-    private void addMesh(com.mks.opengl3.scene.object3d.MeshData mesh) {
+    private static Vertex[] toVertexArray(
+            ArrayList<Vertex> polygon) {
 
-        //------------------------------------
-        // Vertex Offset
-        //------------------------------------
+        Vertex[] vertices =
+                new Vertex[polygon.size()];
 
-        int vertexOffset =
-                lineVertices.size() / Vertex.STRIDE;
+        for (int i = 0; i < polygon.size(); i++) {
 
-        //------------------------------------
-        // Vertices
-        //------------------------------------
-
-        for (float value : mesh.vertices) {
-
-            lineVertices.add(value);
+            vertices[i] = polygon.get(i);
 
         }
 
-        //------------------------------------
-        // Triangle Indices
-        //------------------------------------
+        return vertices;
+    }
+    private static Vertex toVertex(ContourPoint p) {
 
-        for (int index : mesh.triangleIndices) {
+        return new Vertex(
+                p.x,
+                p.y,
+                p.z,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
+                0.0f,
 
-            triangleIndices.add(index + vertexOffset);
-
-        }
-
-        //------------------------------------
-        // Line Indices
-        //------------------------------------
-
-        for (int index : mesh.lineIndices) {
-
-            lineIndices.add(index + vertexOffset);
-
-        }
+                p.r,
+                p.g,
+                p.b,
+                p.a
+        );
 
     }
-    // Marching Squares Table
-//------------------------------------------------------
+    private static ArrayList<ArrayList<Integer>> getSegmentsFromLineIndices(int[] lineIndices) {
 
+        class Edge {
+            int a, b;
+            boolean used;
+
+            Edge(int a, int b) {
+                this.a = a;
+                this.b = b;
+            }
+
+            int other(int v) {
+                return (a == v) ? b : a;
+            }
+
+            boolean contains(int v) {
+                return a == v || b == v;
+            }
+        }
+
+        ArrayList<Edge> edges = new ArrayList<>();
+
+        for (int i = 0; i < lineIndices.length; i += 2) {
+            if (lineIndices[i] == lineIndices[i + 1])
+                continue;
+
+            edges.add(new Edge(lineIndices[i], lineIndices[i + 1]));
+        }
+
+        ArrayList<ArrayList<Integer>> segments = new ArrayList<>();
+
+        while (true) {
+
+            Edge start = null;
+
+            for (Edge e : edges) {
+                if (!e.used) {
+                    start = e;
+                    break;
+                }
+            }
+
+            if (start == null)
+                break;
+
+            ArrayList<Integer> segment = new ArrayList<>();
+
+            start.used = true;
+
+            int startVertex = start.a;
+            int currentVertex = start.b;
+
+            segment.add(start.a);
+            segment.add(start.b);
+
+            Edge currentEdge = start;
+
+            while (true) {
+
+                if (currentVertex == startVertex)
+                    break;
+
+                Edge nextEdge = null;
+
+                for (Edge e : edges) {
+
+                    if (e.used)
+                        continue;
+
+                    if (e.contains(currentVertex)) {
+
+                        nextEdge = e;
+                        break;
+
+                    }
+                }
+
+                if (nextEdge == null) {
+
+                    // مسیر باز
+                    segment.clear();
+                    break;
+                }
+
+                nextEdge.used = true;
+
+                currentVertex = nextEdge.other(currentVertex);
+
+                segment.add(currentVertex);
+
+                currentEdge = nextEdge;
+            }
+
+            if (!segment.isEmpty())
+                segments.add(segment);
+        }
+
+        return segments;
+    }
     private static final int[][] CASES = {
 
             {},             //0
@@ -441,7 +620,6 @@ public class ContourGenerator {
                         level);
                 currentContour.add(p0);
                 currentContour.add(p1);
-
             }
 
             if(buildWalls){
@@ -532,14 +710,7 @@ public class ContourGenerator {
 
         return p;
 
-    }    //----------------------------------------------------
-// Get Vertex Index
-//----------------------------------------------------
-
-    //----------------------------------------------------
-// Shared Vertex
-//----------------------------------------------------
-
+    }
     private int getVertexIndex(
 
             float px,
@@ -609,9 +780,6 @@ public class ContourGenerator {
         return index;
 
     }
-    //------------------------------------------------------
-// Add Line
-//------------------------------------------------------
 
     private void addLine(
             ContourPoint p0,
@@ -628,10 +796,8 @@ public class ContourGenerator {
 
         lineIndices.add(i0);
         lineIndices.add(i1);
-
-        roofIndices.add( new Integer[][]{
-                {i0, vertexCount++},{i1,vertexCount++}});
-
+        roofIndices.add(i0);
+        roofIndices.add(i1);
     }
 //------------------------------------------------------
 
@@ -678,118 +844,6 @@ public class ContourGenerator {
 // Build Roofs
 //------------------------------------------------------
 
-    private void buildRoofs(){
-
-        for(float level = minHeight;
-            level <= maxHeight;
-            level += interval){
-
-            //--------------------------------------
-            // ساخت Mask
-            //--------------------------------------
-
-            createLevelMask(level);
-
-            //--------------------------------------
-            // Greedy Meshing
-            //--------------------------------------
-
-            // meshLevel(level);
-
-        }
-
-    }
-    //------------------------------------------------------
-// Create Mask
-//------------------------------------------------------
-
-    private void createLevelMask(float level){
-
-        levelMask = new boolean[height][width];
-
-        for(int y=0;y<height;y++){
-
-            for(int x=0;x<width;x++){
-
-                levelMask[y][x] =
-                        vertices[y][x].pz >= level;
-
-            }
-
-        }
-
-    }
-    //------------------------------------------------------
-// Append Mesh
-//------------------------------------------------------
-    private static class RoofVertexKey {
-
-        private static final float SCALE = 100000.0f;
-
-        private final int x;
-        private final int y;
-        private final int z;
-
-        public RoofVertexKey(Vertex vertex) {
-
-            x = Math.round(vertex.px * SCALE);
-            y = Math.round(vertex.py * SCALE);
-            z = Math.round(vertex.pz * SCALE);
-
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-
-            if (this == obj)
-                return true;
-
-            if (!(obj instanceof RoofVertexKey))
-                return false;
-
-            RoofVertexKey other = (RoofVertexKey) obj;
-
-            return x == other.x &&
-                    y == other.y &&
-                    z == other.z;
-
-        }
-
-        @Override
-        public int hashCode() {
-
-            int result = x;
-            result = 31 * result + y;
-            result = 31 * result + z;
-
-            return result;
-
-        }
-
-    }
 
 
-    private int addRoofVertex(Vertex vertex) {
-
-        RoofVertexKey key =
-                new RoofVertexKey(vertex);
-
-        Integer index =
-                roofVertexMap.get(key);
-
-        if (index != null) {
-
-            return index;
-
-        }
-
-        index = roofVertices.size();
-
-        roofVertices.add(vertex);
-
-        roofVertexMap.put(key, index);
-
-        return index;
-
-    }
 }
