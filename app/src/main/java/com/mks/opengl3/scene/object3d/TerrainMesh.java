@@ -45,7 +45,7 @@ public class TerrainMesh extends Mesh {
 //        setTriangleIndices(md.triangleIndices);
 //        setLineIndices(md.lineIndices);
         ContourGenerator m =new ContourGenerator(vertices);
-        ContourGenerator.MeshData md = m.build(0.1f,false,true,true);
+        MeshData md = m.build(0.1f,true,false,true);
         setVertices(md.vertices);
         setTriangleIndices(md.triangleIndices);
         setLineIndices(md.lineIndices);

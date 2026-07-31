@@ -1,6 +1,10 @@
 package com.mks.opengl3.scene.object3d;
 
+import static com.mks.opengl3.utils.Utility.toFloatArray;
+import static com.mks.opengl3.utils.Utility.toIntArray;
+
 import android.util.Log;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,16 +20,12 @@ public class ContourGenerator {
     private ArrayList<Integer> roofIndices =
             new ArrayList<>();
 
-    private MeshData MeshData;
-    private final ArrayList<Vertex> roofVertices =
-            new ArrayList<>();
 
 
     private Vertex[][] vertices;
     private boolean buildRoof;
     private boolean buildWalls;
     private boolean buildLines;
-    private boolean[][] levelMask;
     private float interval;
 
 
@@ -72,25 +72,7 @@ public class ContourGenerator {
     // MeshData
     //---------------------------------------
 
-    public static class MeshData{
 
-        public final float[] vertices;
-        public int[] lineIndices;
-
-        public int[] triangleIndices;
-
-        public MeshData(
-                float[] vertices,
-                int[] triangleIndices,
-                int[] lineIndices){
-
-            this.vertices=vertices;
-            this.lineIndices=lineIndices;
-            this.triangleIndices=triangleIndices;
-
-        }
-
-    }
     static class ContourPoint {
 
         float x;
@@ -247,20 +229,16 @@ public class ContourGenerator {
         // تولید خطوط میزان
         //---------------------------------------
 
-//        for(float level = firstLevel;
-//            level <= maxHeight;
-//            level += interval){
-//
-//            processLevel(level);
-//
-//        }
+        for(float level = firstLevel;
+            level <= maxHeight;
+            level += interval){
 
-
-            processLevel(1.0f);
-        if(buildRoof){
-
+            processLevel(level);
 
         }
+
+
+//            processLevel(1.0f);
 
 
         return new MeshData(
@@ -271,34 +249,6 @@ public class ContourGenerator {
 
         );
 
-    }
-    //----------------------------------------------------
-// ArrayList<Float> -> float[]
-//----------------------------------------------------
-
-    private float[] toFloatArray(ArrayList<Float> list){
-
-        float[] array = new float[list.size()];
-
-        for(int i = 0; i < list.size(); i++){
-            array[i] = list.get(i);
-        }
-
-        return array;
-    }
-    //----------------------------------------------------
-// ArrayList<Integer> -> int[]
-//----------------------------------------------------
-
-    private int[] toIntArray(ArrayList<Integer> list){
-
-        int[] array = new int[list.size()];
-
-        for(int i = 0; i < list.size(); i++){
-            array[i] = list.get(i);
-        }
-
-        return array;
     }
 
     private void processLevel(float level){
@@ -344,6 +294,7 @@ public class ContourGenerator {
                         new ArrayList<>();
 
                 for (Integer index : segment) {
+                    if (index<currentContour.size())
                     polygon.add(toVertex(currentContour.get(index)));
                 }
 
@@ -354,44 +305,56 @@ public class ContourGenerator {
                 DelaunayMesher mesher =
                         new DelaunayMesher();
 
-                DelaunayMesher.MeshData M =
+                MeshData M =
                         mesher.triangulate(toVertexArray(polygon));
 
 
-                int[] globalIndices = new int[M.vertices.length/15];
+          //      int[] globalIndices = new int[M.vertices.length/15];
 
-                for (int i = 0; i < M.vertices.length/15; i++) {
+//                for (int i = 0; i < M.vertices.length/15; i++) {
+//
+//                    globalIndices[i] = getVertexIndex(
+//
+//                            M.vertices[i * 15],
+//                            M.vertices[i * 15+1],
+//                            M.vertices[i * 15+2],
+//
+//                            M.vertices[i * 15+10],
+//                            M.vertices[i * 15+11],
+//                            M.vertices[i * 15+12],
+//                            M.vertices[i * 15+13]
+//
+//                    );
 
-                    globalIndices[i] = getVertexIndex(
-
-                            M.vertices[i * 15],
-                            M.vertices[i * 15+1],
-                            M.vertices[i * 15+2],
-
-                            M.vertices[i * 15+10],
-                            M.vertices[i * 15+11],
-                            M.vertices[i * 15+12],
-                            M.vertices[i * 15+13]
-
-                    );
-
-                }
-
-//----------------------------------
-// اضافه کردن مثلث ها
-//----------------------------------
+//                }
 
                 for (int i = 0; i < M.triangleIndices.length; i++) {
+                    int NewIndex=
+                            getVertexIndex(
 
-                    triangleIndices.add(
+                                    M.vertices[M.triangleIndices[i] * 15],
+                                    M.vertices[M.triangleIndices[i] * 15+1],
+                                    M.vertices[M.triangleIndices[i] * 15+2],
 
-                            globalIndices[
-                                    M.triangleIndices[i]
-                                    ]
+                                    M.vertices[M.triangleIndices[i] * 15+10],
+                                    M.vertices[M.triangleIndices[i] * 15+11],
+                                    M.vertices[M.triangleIndices[i] * 15+12],
+                                    M.vertices[M.triangleIndices[i] * 15+13]
 
-                    );
+                            );
+                    triangleIndices.add(NewIndex);
+
+
 
                 }
+//                lineVertices.clear();
+//                for (int i = 0; i < M.vertices.length; i++) {
+//                lineVertices.add(M.vertices[i]);
+//                }
+//                triangleIndices.clear();
+//                for (int i = 0; i < M.triangleIndices.length; i++) {
+//                    triangleIndices.add(M.triangleIndices[i]);
+//                }
 
 
             }

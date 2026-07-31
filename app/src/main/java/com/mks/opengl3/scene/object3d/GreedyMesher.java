@@ -1,5 +1,8 @@
 package com.mks.opengl3.scene.object3d;
 
+import static com.mks.opengl3.utils.Utility.toFloatArray;
+import static com.mks.opengl3.utils.Utility.toIntArray;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,28 +74,7 @@ public class GreedyMesher {
 
     }
 
-    //----------------------------------------------------
-    // Output
-    //----------------------------------------------------
-    public static class MeshData{
 
-        public final float[] vertices;
-        public int[] lineIndices;
-
-        public int[] triangleIndices;
-
-        public MeshData(
-                float[] vertices,
-                int[] triangleIndices,
-                int[] lineIndices){
-
-            this.vertices=vertices;
-            this.lineIndices=lineIndices;
-            this.triangleIndices=triangleIndices;
-
-        }
-
-    }
     public MeshData build(Mode mode){
 
         //--------------------------------------
@@ -523,25 +505,6 @@ public class GreedyMesher {
 // Array Convert
 //----------------------------------------------------
 
-    private float[] toFloatArray(ArrayList<Float> list){
-
-        float[] array = new float[list.size()];
-
-        for(int i=0;i<list.size();i++)
-            array[i]=list.get(i);
-
-        return array;
-    }
-
-    private int[] toIntArray(ArrayList<Integer> list){
-
-        int[] array = new int[list.size()];
-
-        for(int i=0;i<list.size();i++)
-            array[i]=list.get(i);
-
-        return array;
-    }
     //----------------------------------------------------
 // Add Vertex
 //----------------------------------------------------
