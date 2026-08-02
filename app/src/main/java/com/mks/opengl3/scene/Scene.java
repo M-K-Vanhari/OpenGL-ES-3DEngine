@@ -50,10 +50,10 @@ public class Scene extends Layer {
         options.inScaled = false; // غیرفعال کردن کامل مقیاس
         Bitmap bitmap = BitmapFactory.decodeResource(
                 MainActivity.getInstance().getResources(),
-                R.drawable.e,
+                R.drawable.a,
                 options);
 
-        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES|Object3D.TRIANGLES,bitmap.getWidth(),bitmap.getHeight());
+        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS,bitmap.getWidth(),bitmap.getHeight());
         StandardMaterial3D material = new StandardMaterial3D(new StandardObject3DShader(context));
         material.setTextured(false);
 
@@ -61,7 +61,7 @@ public class Scene extends Layer {
 
         terrain = new Object3D(terrain_mesh, material);
 
-        terrain.setRenderMode(Object3D.LINES|Object3D.TRIANGLES);
+        terrain.setRenderMode(Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS);
         root.addChild(terrain);
 
         blockRotating = false;

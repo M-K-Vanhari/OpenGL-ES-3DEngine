@@ -24,7 +24,7 @@ void main(){
     vOut.fragmentPosition = vec3(uModel * vec4(aPosition, 1.0));
     vOut.color = aColor;
     vOut.texCoord = aTexCoord;
-
+    gl_PointSize = 5.0;
     mat3 normalMatrix = mat3(transpose(inverse(mat3(uModel))));
     vec3 tangent = normalize(normalMatrix * aTangent);
     vec3 normal = normalMatrix * aNormal;

@@ -44,11 +44,11 @@ public class TerrainMesh extends Mesh {
 //        setVertices(md.vertices);
 //        setTriangleIndices(md.triangleIndices);
 //        setLineIndices(md.lineIndices);
-        ContourGenerator m =new ContourGenerator(vertices);
-        MeshData md = m.build(0.1f,true,false,true);
-        setVertices(md.vertices);
-        setTriangleIndices(md.triangleIndices);
-        setLineIndices(md.lineIndices);
+//        ContourGenerator m =new ContourGenerator(vertices);
+//        MeshData md = m.build(0.1f,true,false,true);
+//        setVertices(md.vertices);
+//        setTriangleIndices(md.triangleIndices);
+//        setLineIndices(md.lineIndices);
 
     }
     private static float quantizeHeight(float z) {

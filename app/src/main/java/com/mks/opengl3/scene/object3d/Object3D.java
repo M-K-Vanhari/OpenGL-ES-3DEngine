@@ -159,14 +159,14 @@ public class Object3D {
 
             material.getShader().setTextured(false);
             material.getShader().setUseVertexColor(false);
-            material.getShader().setColor(new Vec4(1, 0, 0, 1));
+            material.getShader().setColor(new Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
             mesh.drawPoints();
         }
 
 // بازگرداندن وضعیت Material
         material.getShader().setTextured(material.isTextured());
-        mesh.onRender();
+       // mesh.onRender();
 
         material.getShader().unbind();
     }
