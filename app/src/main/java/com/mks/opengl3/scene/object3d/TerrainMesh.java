@@ -27,7 +27,7 @@ public class TerrainMesh extends Mesh {
                 createTriangleIndices(width,height),
                 createLayout()
         );
-        vertices=Vertex.fromFloatArray(getVertices(),width,height);
+
         setTriangleIndices(createTriangleIndices(width,height));
         setLineIndices(createLineIndices(width,height),0);
         if (bitmap != null)
@@ -345,7 +345,7 @@ public class TerrainMesh extends Mesh {
 
         for(int i=0;i<data.size();i++)
             v[i]=data.get(i);
-
+        vertices=Vertex.fromFloatArray(v,w,h);
         return v;
     }
 
@@ -421,7 +421,7 @@ public class TerrainMesh extends Mesh {
         for (int i = 0; i < data.size(); i++) {
             v[i] = data.get(i);
         }
-
+        vertices=Vertex.fromFloatArray(v,w,h);
         return v;
     }
     private static float[] createLinePointVertices(float[] vertices) {
@@ -450,7 +450,7 @@ public class TerrainMesh extends Mesh {
 
             dst += STRIDE;
         }
-
+      
         return result;
     }
 
