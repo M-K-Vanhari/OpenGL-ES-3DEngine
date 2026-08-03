@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TerrainMesh extends Mesh {
-    Vertex[][] vertices;
+    static Vertex[][] vertices;
     private static final float HEIGHT_TOLERANCE = 0.5f;
 
     public TerrainMesh(Bitmap bitmap,int mode,int width, int height) {
@@ -27,7 +27,7 @@ public class TerrainMesh extends Mesh {
                 createTriangleIndices(width,height),
                 createLayout()
         );
-
+        vertices=Vertex.fromFloatArray(getVertices(),width,height);
         setTriangleIndices(createTriangleIndices(width,height));
         setLineIndices(createLineIndices(width,height),0);
         if (bitmap != null)
@@ -38,21 +38,21 @@ public class TerrainMesh extends Mesh {
             setLinePointsIndices(createLinePointIndices(getVertices()));
         }
 
-        vertices=Vertex.fromFloatArray(getVertices(),width,height);
-     //   GreedyMesher m =new GreedyMesher(vertices);
+
+        //   GreedyMesher m =new GreedyMesher(vertices);
 //        MeshData md = new GreedyMesher(vertices).build(GreedyMesher.Mode.SQUARE);
 //        setMeshData(md);
 //        setVertices(md.vertices);
 //        setTriangleIndices(md.triangleIndices);
 //        setLineIndices(md.lineIndices);
 //        ContourGenerator m =new ContourGenerator(vertices);
-
-        MeshData md = new TerracedMeshGenerator().build(vertices,0.1f);
-        setMeshData(md);
-        md = new ContourGenerator(vertices).build(0.1f,false,false,true);
-
-        addMeshData(md);
-        setLineIndices(md.lineIndices,(getVertices().length- md.vertices.length)/Vertex.STRIDE);
+//
+//        MeshData md = new TerracedMeshGenerator().build(vertices,0.1f);
+//        setMeshData(md);
+//        md = new ContourGenerator(vertices).build(0.1f,false,false,true);
+//
+//        addMeshData(md);
+//        setLineIndices(md.lineIndices,(getVertices().length- md.vertices.length)/Vertex.STRIDE);
 
 //        setVertices(md.vertices);
 //        setTriangleIndices(md.triangleIndices);
@@ -217,14 +217,29 @@ public class TerrainMesh extends Mesh {
                 int i1 = i0+1;
                 int i2 = i0+w;
                 int i3 = i2+1;
+                if (vertices!=null) {
+                    Vertex v0 = vertices[y][x];
+                    Vertex v1 = vertices[y][x + 1];
+                    Vertex v2 = vertices[y + 1][x];
+                    Vertex v3 = vertices[y + 1][x + 1];
 
-                ind.add(i2);
-                ind.add(i0);
-                ind.add(i1);
+                    // مثلث اول
+                    if (v0.a > 0 && v1.a > 0 && v2.a > 0) {
 
-                ind.add(i2);
-                ind.add(i1);
-                ind.add(i3);
+                        ind.add(i2);
+                        ind.add(i0);
+                        ind.add(i1);
+                    }
+
+                    // مثلث دوم
+                    if (v1.a > 0 && v2.a > 0 && v3.a > 0) {
+
+                        ind.add(i2);
+                        ind.add(i1);
+                        ind.add(i3);
+                    }
+
+                }
             }
         }
 
@@ -245,11 +260,19 @@ public class TerrainMesh extends Mesh {
 
             for(int x=0;x<w-1;x++){
 
-                int i0=y*w+x;
-                int i1=i0+1;
+                if (vertices!=null) {
 
-                ind.add(i0);
-                ind.add(i1);
+                    if (vertices[y][x].a > 0 &&
+                            vertices[y][x + 1].a > 0) {
+
+                        int i0 = y * w + x;
+                        int i1 = i0 + 1;
+
+                        ind.add(i0);
+                        ind.add(i1);
+                    }
+                }
+
             }
         }
 
@@ -257,12 +280,16 @@ public class TerrainMesh extends Mesh {
         for(int x=0;x<w;x++){
 
             for(int y=0;y<h-1;y++){
+                if (vertices!=null) {
+                if (vertices[y][x].a > 0 &&
+                        vertices[y + 1][x].a > 0) {
 
-                int i0=y*w+x;
-                int i1=i0+w;
+                    int i0 = y * w + x;
+                    int i1 = i0 + w;
 
-                ind.add(i0);
-                ind.add(i1);
+                    ind.add(i0);
+                    ind.add(i1);
+                }}
             }
         }
 
@@ -341,7 +368,9 @@ public class TerrainMesh extends Mesh {
                 float r = ((pixel >> 16) & 0xFF) / 255.0f;
                 float g = ((pixel >> 8) & 0xFF) / 255.0f;
                 float b = (pixel & 0xFF) / 255.0f;
-
+                float a=1.0f;
+                if ((r==1.0f)&&(b==1.0f))
+                    a=0;
                 // موقعیت در فضای 3D (می‌توانید بر اساس رنگ ارتفاع دهید)
                 float px = x * sx - 1.5f;
                 float py = y * sy - 1.5f;
@@ -383,7 +412,8 @@ public class TerrainMesh extends Mesh {
                 data.add(r);
                 data.add(g);
                 data.add(b);
-                data.add(1f); // alpha
+
+                data.add(a); // alpha
             }
         }
 

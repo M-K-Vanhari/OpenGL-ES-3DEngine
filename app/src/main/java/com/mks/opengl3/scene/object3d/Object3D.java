@@ -108,7 +108,10 @@ public class Object3D {
         material.getShader().setPointLightPositions(scene.getPointLightPositions());
         material.getShader().setPointLightColors(scene.getPointLightColors());
         material.getShader().setAmbientLight(scene.getAmbientLight());
-
+        GLES32.glEnable(GLES32.GL_BLEND);
+        GLES32.glBlendFunc(
+                GLES32.GL_SRC_ALPHA,
+                GLES32.GL_ONE_MINUS_SRC_ALPHA);
 // ---------- Triangles ----------
         if ((Object3D.renderMode & Object3D.TRIANGLES) != 0) {
 

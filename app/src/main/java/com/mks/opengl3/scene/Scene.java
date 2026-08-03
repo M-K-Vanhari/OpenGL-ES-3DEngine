@@ -50,7 +50,7 @@ public class Scene extends Layer {
         options.inScaled = false; // غیرفعال کردن کامل مقیاس
         Bitmap bitmap = BitmapFactory.decodeResource(
                 MainActivity.getInstance().getResources(),
-                R.drawable.a,
+                R.drawable.f,
                 options);
 
         TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS|Object3D.COMPLEX,bitmap.getWidth(),bitmap.getHeight());
