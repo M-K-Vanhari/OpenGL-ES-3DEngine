@@ -53,7 +53,7 @@ public class Scene extends Layer {
                 R.drawable.a,
                 options);
 
-        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS,bitmap.getWidth(),bitmap.getHeight());
+        TerrainMesh terrain_mesh = new TerrainMesh(bitmap ,Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS|Object3D.COMPLEX,bitmap.getWidth(),bitmap.getHeight());
         StandardMaterial3D material = new StandardMaterial3D(new StandardObject3DShader(context));
         material.setTextured(false);
 
@@ -61,7 +61,7 @@ public class Scene extends Layer {
 
         terrain = new Object3D(terrain_mesh, material);
 
-        terrain.setRenderMode(Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS);
+        terrain.setRenderMode(Object3D.LINES|Object3D.TRIANGLES|Object3D.POINTS|Object3D.COMPLEX);
         root.addChild(terrain);
 
         blockRotating = false;

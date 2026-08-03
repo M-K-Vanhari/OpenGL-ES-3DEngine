@@ -17,7 +17,7 @@ import java.util.List;
 
 public class TerrainMesh extends Mesh {
     Vertex[][] vertices;
-    private static final float HEIGHT_TOLERANCE = 0.1f;
+    private static final float HEIGHT_TOLERANCE = 0.5f;
 
     public TerrainMesh(Bitmap bitmap,int mode,int width, int height) {
         super(
@@ -29,7 +29,7 @@ public class TerrainMesh extends Mesh {
         );
 
         setTriangleIndices(createTriangleIndices(width,height));
-        setLineIndices(createLineIndices(width,height));
+        setLineIndices(createLineIndices(width,height),0);
         if (bitmap != null)
             setOLineIndices(createLineIndicesOptimized(createVerticesFromBitmap(bitmap),width,height));
         if (mode == Object3D.LINEPOINTS)
@@ -39,13 +39,21 @@ public class TerrainMesh extends Mesh {
         }
 
         vertices=Vertex.fromFloatArray(getVertices(),width,height);
-//        GreedyMesher m =new GreedyMesher(vertices);
-//        GreedyMesher.MeshData md = m.build(GreedyMesher.Mode.SQUARE);
+     //   GreedyMesher m =new GreedyMesher(vertices);
+//        MeshData md = new GreedyMesher(vertices).build(GreedyMesher.Mode.SQUARE);
+//        setMeshData(md);
 //        setVertices(md.vertices);
 //        setTriangleIndices(md.triangleIndices);
 //        setLineIndices(md.lineIndices);
 //        ContourGenerator m =new ContourGenerator(vertices);
-//        MeshData md = m.build(0.1f,true,false,true);
+
+        MeshData md = new TerracedMeshGenerator().build(vertices,0.1f);
+        setMeshData(md);
+        md = new ContourGenerator(vertices).build(0.1f,false,false,true);
+
+        addMeshData(md);
+        setLineIndices(md.lineIndices,(getVertices().length- md.vertices.length)/Vertex.STRIDE);
+
 //        setVertices(md.vertices);
 //        setTriangleIndices(md.triangleIndices);
 //        setLineIndices(md.lineIndices);
@@ -337,7 +345,7 @@ public class TerrainMesh extends Mesh {
                 // موقعیت در فضای 3D (می‌توانید بر اساس رنگ ارتفاع دهید)
                 float px = x * sx - 1.5f;
                 float py = y * sy - 1.5f;
-                //   float pz = (r + g + b) / 3.0f * 2.0f - 1.0f; // ارتفاع بر اساس روشنایی
+//                   float pz = (r + g + b) / 3.0f * 2.0f - 1.0f; // ارتفاع بر اساس روشنایی
                 float pz = quantizeHeight(
                         (float)Math.sqrt(
                                 (r - 0f) * (r - 0f) +
@@ -364,7 +372,13 @@ public class TerrainMesh extends Mesh {
                 data.add(1f);
                 data.add(0f);
                 data.add(0f);
-
+                if(r > 0 && b > 0)
+                {
+                    if(r > b)
+                        b = 0;
+                    else
+                        r = 0;
+                }
                 // color (رنگ پیکسل)
                 data.add(r);
                 data.add(g);

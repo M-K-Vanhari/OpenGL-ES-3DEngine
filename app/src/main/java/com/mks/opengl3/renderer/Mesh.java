@@ -3,7 +3,9 @@ package com.mks.opengl3.renderer;
 import android.opengl.GLES32;
 
 import com.mks.opengl3.math.Vec4;
+import com.mks.opengl3.scene.object3d.MeshData;
 import com.mks.opengl3.scene.object3d.Object3D;
+import com.mks.opengl3.scene.object3d.Vertex;
 
 import java.util.List;
 
@@ -13,7 +15,8 @@ public abstract class Mesh {
     protected int[] indices;
     protected VertexArray vertexArray;
     protected List<BufferElement> elements;
-
+    private int[] lineIndices;
+    private int[] triangleIndices;
     private IndexBuffer triangleIBO;
     private IndexBuffer lineIBO;
     private IndexBuffer olineIBO;
@@ -39,22 +42,115 @@ public abstract class Mesh {
 
     public void setTriangleIndices(int[] indices){
         triangleIBO = new IndexBuffer(indices);
-        currentMode = GLES32.GL_TRIANGLES;
-        currentIBO = triangleIBO;
-
     }
 
-    public void setLineIndices(int[] indices){
-        lineIBO = new IndexBuffer(indices);
-        currentMode = GLES32.GL_LINES;
-        currentIBO = lineIBO;
+    public void setLineIndices(int[] indices, int offset){
+
+        int[] newIndices = new int[indices.length];
+
+        for(int i = 0; i < indices.length; i++){
+
+            newIndices[i] = indices[i] + offset;
+
+        }
+
+        lineIBO = new IndexBuffer(newIndices);
     }
 
     public void setVertices(float[] vertices) {
         this.vertices = vertices;
         vertexBuffer.setData(vertices);
     }
+    public void setMeshData(MeshData m){
+        this.vertices = m.vertices;
+        this.lineIndices = m.lineIndices;
+        this.triangleIndices = m.triangleIndices;
 
+        vertexBuffer.setData(vertices);
+
+        lineIBO = new IndexBuffer(lineIndices);
+        triangleIBO = new IndexBuffer(triangleIndices);
+    }
+
+    public void addMeshData(MeshData m){
+
+        int vertexOffset =
+                vertices.length / Vertex.STRIDE;
+
+
+        float[] newVertices =
+                new float[vertices.length + m.vertices.length];
+
+
+        System.arraycopy(
+                vertices,
+                0,
+                newVertices,
+                0,
+                vertices.length
+        );
+
+
+        System.arraycopy(
+                m.vertices,
+                0,
+                newVertices,
+                vertices.length,
+                m.vertices.length
+        );
+
+
+        int[] newLines =
+                new int[lineIndices.length + m.lineIndices.length];
+
+
+        System.arraycopy(
+                lineIndices,
+                0,
+                newLines,
+                0,
+                lineIndices.length
+        );
+
+
+        for(int i = 0; i < m.lineIndices.length; i++){
+
+            newLines[lineIndices.length+i] =
+                    m.lineIndices[i] + vertexOffset;
+        }
+
+
+        int[] newTriangles =
+                new int[triangleIndices.length + m.triangleIndices.length];
+
+
+        System.arraycopy(
+                triangleIndices,
+                0,
+                newTriangles,
+                0,
+                triangleIndices.length
+        );
+
+
+        for(int i = 0; i < m.triangleIndices.length; i++){
+
+            newTriangles[triangleIndices.length+i] =
+                    m.triangleIndices[i] + vertexOffset;
+        }
+
+
+        this.vertices = newVertices;
+        this.lineIndices = newLines;
+        this.triangleIndices = newTriangles;
+
+
+        vertexBuffer.setData(vertices);
+
+        lineIBO = new IndexBuffer(lineIndices);
+
+        triangleIBO = new IndexBuffer(triangleIndices);
+    }
     public void setOLineIndices(int[] indices){
         olineIBO = new IndexBuffer(indices);
         currentMode = GLES32.GL_LINES;

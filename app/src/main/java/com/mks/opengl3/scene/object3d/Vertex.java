@@ -136,4 +136,40 @@ public class Vertex {
 
         return data;
     }
+    public static float[] toFloatArray(Vertex[][] vertices) {
+
+        int height = vertices.length;
+        int width = vertices[0].length;
+        float[] data = new float[height*width * STRIDE];
+        int index =0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+
+                Vertex v = vertices[y][x];
+
+                data[index] = v.px;
+                data[index + 1] = v.py;
+                data[index + 2] = v.pz;
+
+                data[index + 3] = v.u;
+                data[index + 4] = v.v;
+
+                data[index + 5] = v.nx;
+                data[index + 6] = v.ny;
+                data[index + 7] = v.nz;
+
+                data[index + 8] = v.tx;
+                data[index + 9] = v.ty;
+                data[index + 10] = v.tz;
+
+                data[index + 11] = v.r;
+                data[index + 12] = v.g;
+                data[index + 13] = v.b;
+                data[index + 14] = v.a;
+                index+=STRIDE;
+            }
+        }
+        return data;
+    }
+
 }

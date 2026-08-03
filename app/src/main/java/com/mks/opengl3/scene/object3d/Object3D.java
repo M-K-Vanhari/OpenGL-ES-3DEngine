@@ -34,6 +34,7 @@ public class Object3D {
     public static final int OLINES = 4;
     public static final int POINTS = 16;
     public static final int LINEPOINTS = 32;
+    public static final int COMPLEX = 64;
 
 
     public static int renderMode = TRIANGLES;
@@ -128,8 +129,8 @@ public class Object3D {
 
             material.getShader().setTextured(false);
             material.getShader().setUseVertexColor(false);
-            if ((Object3D.renderMode & Object3D.TRIANGLES) != 0)
-                material.getShader().setColor(new Vec4(0, 0, 0, 1));
+            if ((Object3D.renderMode & Object3D.COMPLEX) != 0)
+                material.getShader().setColor(new Vec4(1.0f, 1.0f, 1.0f, 1));
             else
             {
                 material.getShader().setUseVertexColor(true);
